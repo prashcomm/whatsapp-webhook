@@ -1,20 +1,13 @@
 "{
   \"name\": \"whatsapp-webhook-proxy\",
   \"version\": \"1.0.0\",
-  \"description\": \"WhatsApp Webhook Proxy for Amazon Smbhav AI Assistant\",
+  \"description\": \"WhatsApp Webhook Proxy\",
   \"main\": \"app.js\",
   \"scripts\": {
-    \"start\": \"node app.js\",
-    \"dev\": \"nodemon app.js\"
+    \"start\": \"node app.js\"
   },
   \"dependencies\": {
     \"express\": \"^4.18.2\",
     \"node-fetch\": \"^2.6.7\"
-  },
-  \"devDependencies\": {
-    \"nodemon\": \"^2.0.22\"
-  },
-  \"engines\": {
-    \"node\": \">=14.0.0\"
   }
 }"
