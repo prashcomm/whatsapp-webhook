@@ -1,4 +1,4 @@
-{
+"{
   \"name\": \"whatsapp-webhook-proxy\",
   \"version\": \"1.0.0\",
   \"description\": \"WhatsApp Webhook Proxy for Amazon Smbhav AI Assistant\",
@@ -17,4 +17,4 @@
   \"engines\": {
     \"node\": \">=14.0.0\"
   }
-}
+}"
