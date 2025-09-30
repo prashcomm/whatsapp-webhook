@@ -1,38 +1,40 @@
+// Import Express.js and fetch
 const express = require('express');
 const fetch = require('node-fetch');
+
+// Create an Express app
 const app = express();
 
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-const VERIFY_TOKEN = "smbhav_webhook_verify_2025";
-const AI_SYSTEM_URL = "https://event-ai-helper.preview.emergentagent.com/api/webhook/whatsapp";
+// Set port and verify_token
+const port = process.env.PORT || 3000;
+const verifyToken = process.env.VERIFY_TOKEN || 'smbhav_webhook_verify_2025';
+const aiSystemUrl = 'https://event-ai-helper.preview.emergentagent.com/api/webhook/whatsapp';
 
-app.get('/webhook', (req, res) => {
-  console.log('Webhook verification request received');
-  
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
+// Route for GET requests (webhook verification)
+app.get('/', (req, res) => {
+  const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
 
-  if (mode && token) {
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('WEBHOOK_VERIFIED');
-      res.status(200).send(challenge);
-    } else {
-      console.log('Verification failed');
-      res.sendStatus(403);
-    }
+  if (mode === 'subscribe' && token === verifyToken) {
+    console.log('WEBHOOK VERIFIED');
+    res.status(200).send(challenge);
   } else {
-    res.sendStatus(400);
+    res.status(403).end();
   }
 });
 
-app.post('/webhook', async (req, res) => {
-  console.log('Incoming WhatsApp message received');
-  console.log('Payload:', JSON.stringify(req.body, null, 2));
+// Route for POST requests (incoming messages)
+app.post('/', async (req, res) => {
+  const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  console.log(`\n\nWebhook received ${timestamp}\n`);
+  console.log(JSON.stringify(req.body, null, 2));
 
+  // Forward to AI system
   try {
-    const response = await fetch(AI_SYSTEM_URL, {
+    console.log('Forwarding to AI system...');
+    const response = await fetch(aiSystemUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,29 +46,21 @@ app.post('/webhook', async (req, res) => {
     console.log('AI System Response Status:', response.status);
     
     if (response.ok) {
-      console.log('Message forwarded successfully');
+      console.log('Message forwarded successfully to AI system');
     } else {
       console.error('AI System Error:', response.statusText);
     }
 
-    res.status(200).json({ status: 'received' });
-
   } catch (error) {
-    console.error('Error forwarding to AI system:', error);
-    res.status(200).json({ status: 'error' });
+    console.error('Error forwarding to AI system:', error.message);
   }
+
+  // Always respond 200 to Meta
+  res.status(200).end();
 });
 
-app.get('/', (req, res) => {
-  res.json({
-    status: 'WhatsApp Webhook Proxy Active',
-    target: AI_SYSTEM_URL
-  });
-});
-
-const port = process.env.PORT || 3000;
+// Start the server
 app.listen(port, () => {
-  console.log('WhatsApp Webhook Proxy listening on port', port);
+  console.log(`\nWhatsApp Webhook Proxy listening on port ${port}\n`);
+  console.log(`Forwarding to: ${aiSystemUrl}\n`);
 });
-
-module.exports = app;
