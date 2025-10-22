@@ -11,7 +11,7 @@ app.use(express.json());
 // Set port and verify_token
 const port = process.env.PORT || 3000;
 const verifyToken = process.env.VERIFY_TOKEN || 'smbhav_webhook_verify_2025';
-const aiSystemUrl = 'https://event-ai-helper.preview.emergentagent.com/api/webhook/whatsapp';
+const aiSystemUrl = 'https://smbhav-chatbot.emergent.host/api/webhook/whatsapp';
 
 // Route for GET requests (webhook verification)
 app.get('/', (req, res) => {
