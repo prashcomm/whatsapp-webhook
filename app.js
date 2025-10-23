@@ -24,30 +24,56 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    backend: BACKEND_URL
+    backend: BACKEND_URL,
+    verifyToken: VERIFY_TOKEN
+  });
+});
+
+// Simple test endpoint
+app.get('/test', (req, res) => {
+  res.json({
+    message: 'Webhook forwarder is working!',
+    timestamp: new Date().toISOString(),
+    queryParams: req.query,
+    headers: req.headers
   });
 });
 
 // Webhook verification (GET)
 app.get('/', (req, res) => {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
+  // Try both query params formats
+  const mode = req.query['hub.mode'] || req.query.mode;
+  const token = req.query['hub.verify_token'] || req.query.verify_token || req.query.token;
+  const challenge = req.query['hub.challenge'] || req.query.challenge;
 
   console.log('\n' + '='.repeat(80));
-  console.log('📋 WEBHOOK VERIFICATION REQUEST');
+  console.log('📋 WEBHOOK VERIFICATION/HEALTH CHECK (GET)');
   console.log('='.repeat(80));
+  console.log(`Query params:`, JSON.stringify(req.query, null, 2));
+  console.log(`User-Agent: ${req.headers['user-agent']}`);
   console.log(`Mode: ${mode}`);
   console.log(`Token received: ${token}`);
   console.log(`Expected token: ${VERIFY_TOKEN}`);
   console.log(`Challenge: ${challenge}`);
 
+  // If no query params at all, this might be a health check from Prowtext
+  if (Object.keys(req.query).length === 0) {
+    console.log('ℹ️  No query params - treating as health check');
+    console.log('='.repeat(80) + '\n');
+    return res.status(200).json({ 
+      status: 'ready',
+      message: 'Webhook endpoint is ready',
+      backend: BACKEND_URL
+    });
+  }
+
+  // Proper verification
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log('✅ VERIFICATION SUCCESSFUL');
     console.log('='.repeat(80) + '\n');
     res.status(200).send(challenge);
   } else {
-    console.log('❌ VERIFICATION FAILED');
+    console.log('❌ VERIFICATION FAILED - Token mismatch or missing params');
     console.log('='.repeat(80) + '\n');
     res.status(403).send('Forbidden');
   }
