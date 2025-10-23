@@ -9,7 +9,7 @@ app.use(express.json());
 // Configuration
 const PORT = process.env.PORT || 3000;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'smbhav_webhook_verify_2025';
-const BACKEND_URL = process.env.BACKEND_URL || 'https://smbhav-chatbot.emergent.host/api/whatsapp-messages';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://smbhav-chatbot.emergent.host/api/chat';
 
 console.log('='.repeat(80));
 console.log('WhatsApp Webhook Forwarder v2 Starting...');
